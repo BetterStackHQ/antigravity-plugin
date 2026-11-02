@@ -1,0 +1,136 @@
+---
+name: connect-betterstack
+description: Connect the Better Stack MCP server and check that it works. Use when the user installs the Better Stack plugin or asks to set it up, when a Better Stack request comes in but no Better Stack tools (such as `incidents`, `monitors`, `query`, `documentation`) are available, or when a Better Stack tool fails with "unauthorized", 401 or "needs authentication". Tells the user exactly how to connect in the app they are using (ChatGPT, Codex, Cursor, Antigravity, Claude Code, Claude chat and Cowork, Claude Tag in Slack). Once connected, suggests what to set up next from what the account has, such as Claude investigating every new incident or fixing errors on a schedule. Also use when the user asks what Better Stack can do for them.
+---
+
+# Connect Better Stack
+
+The Better Stack plugin brings skills, and its tools come from the Better Stack MCP server at `https://mcp.betterstack.com`. The server lists no tools until the user signs in with their Better Stack account (OAuth in the browser, no token needed). Until then the skills can't read any data.
+
+## 1. Check whether Better Stack is connected
+
+Look at the tools you have right now.
+
+- **Connected:** you have Better Stack tools, such as `incidents`, `monitors`, `on_calls`, `sources`, `query` or `documentation`. Their names may carry a prefix (`mcp__plugin_betterstack_betterstack__incidents`, `betterstack.incidents`). Confirm with one cheap read-only call: `incidents` with `status: ["ongoing"]`, or `monitors`. If it returns data (even an empty list), say Better Stack is connected and carry on with what the user asked.
+- **Not connected:** no Better Stack tools at all, only an `authenticate` tool for Better Stack, or a call that fails with `unauthorized`, 401, 403 or "needs authentication".
+
+Several Better Stack servers can show up at once, and each kind signs in differently:
+
+- **The Better Stack connector** from the user's Claude account: tool names start with `mcp__claude_ai_`. It signs in at [claude.ai/customize/connectors/yours](https://claude.ai/customize/connectors/yours).
+- **The plugin's own server**: tool names start with `mcp__plugin_betterstack_betterstack__`, and `/mcp` lists it as `plugin:betterstack:betterstack`.
+- **A server the user added themselves** under a name of their own, such as `betterstack`. `/mcp` lists it under that name.
+
+If any one of them answers, Better Stack is connected: use it, and don't mention the others. When more than one answers, use the connector, then the plugin's server.
+
+Claude Code connects to each address once: a server the user added themselves comes first, then the plugin's server, then the connector. So a server the user added with the address `https://mcp.betterstack.com` hides the plugin's server and the connector, and `/mcp` shows the connector as hidden. If that server is the one that needs a sign-in, say so by its name. The user can sign in to it from `/mcp`, or remove it (`claude mcp remove <name>`) so Claude Code uses the connector.
+
+If you have a Better Stack `authenticate` tool, call it and give the user the sign-in link it returns. After they sign in, call `complete_authentication` if that tool exists, then check again.
+
+Never make up incidents, monitors, logs or metrics while Better Stack isn't connected. Say it isn't connected and give the steps below.
+
+## 2. Work out where you are running
+
+Use what you know about your environment: your system prompt, your tool names, whether you have a shell, and where the conversation is happening.
+
+| Signs | You are in |
+| --- | --- |
+| You are ChatGPT, in chatgpt.com or the ChatGPT app, no shell | ChatGPT |
+| You are Codex, or you have a shell and `codex` is installed | Codex |
+| You are in Cursor, or tool names look like Cursor's | Cursor |
+| You are Antigravity, Google's agent, in its app, IDE or `agy` CLI | Antigravity |
+| You are Claude Code, you have a shell, tool names start with `mcp__` | Claude Code |
+| You are in a Slack channel or thread (Claude Tag) | Claude Tag |
+| You are Claude in claude.ai chat, Cowork, the desktop app or the mobile app, no shell | Claude chat and Cowork |
+
+If you can't tell, ask the user which app they are using, then give that app's steps.
+
+## 3. Tell the user how to connect
+
+Give only the steps for their app, as a short numbered list. Then tell them to start a new chat or session, because most apps load a plugin's tools only when a conversation starts.
+
+### ChatGPT
+
+1. Open **Plugins** in the sidebar and open **Better Stack**.
+2. If it isn't installed yet, select the plus button to install it.
+3. Connect Better Stack when ChatGPT asks, and sign in with your Better Stack account in the window that opens.
+4. Start a new chat and ask again, for example "Who's on call right now?"
+
+In a ChatGPT workspace (Business, Enterprise, Edu), an admin may have to allow the Better Stack plugin first.
+
+### Codex
+
+The CLI and the ChatGPT desktop app share the same setup. If you have a shell, you can run the checks yourself.
+
+1. Check the server is configured: `codex mcp list` should list `betterstack` with the URL `https://mcp.betterstack.com`. If it's missing, install the plugin (`codex plugin marketplace add BetterStackHQ/codex-plugin`, then `codex plugin add betterstack@betterstack`) or add the server: `codex mcp add betterstack --url https://mcp.betterstack.com`.
+2. Sign in: the user runs `codex mcp login betterstack` in a terminal and completes the sign-in in the browser. Don't run it yourself unless the user can see the browser it opens.
+3. Start a new Codex session so the tools load.
+
+### Cursor
+
+1. Install the plugin from the Cursor Marketplace, or use the link in the [Cursor plugin README](https://github.com/BetterStackHQ/cursor-plugin#install).
+2. Open **Customize** in the sidebar, find **betterstack** under MCP and make sure it's turned on.
+3. Sign in when Cursor asks (it opens the browser for Better Stack's sign-in). If it doesn't ask, turn the server off and on again.
+4. Start a new chat.
+
+### Antigravity
+
+1. Open the settings with Cmd + , (Ctrl + , on Windows and Linux) and go to the **Customizations** tab.
+2. Click **Authenticate** next to the Better Stack server and sign in with your Better Stack account in the browser.
+3. Copy the authorization code the browser shows, paste it in the settings panel and click **Submit**.
+4. Start a new conversation.
+
+If there is no Better Stack server at all, install the plugin: `agy plugin install https://github.com/BetterStackHQ/antigravity-plugin`.
+
+### Claude Code
+
+Name the Better Stack server that isn't connected, by the kinds in step 1, and give the steps for that one:
+
+- **The connector** (Claude Code signed in with a Claude account, in the terminal, the Claude app's Code tab or a cloud session):
+  1. Open [claude.ai/customize/connectors/yours](https://claude.ai/customize/connectors/yours), or **Settings** > **Connectors** in the Claude app.
+  2. Click **Connect** next to Better Stack. It's listed as **mcp.betterstack.com**.
+  3. Sign in with your Better Stack account, then start a new session.
+- **The plugin's server**: run `/mcp`, select `plugin:betterstack:betterstack` and sign in in the browser, then start a new session.
+- **A server the user added themselves**: as in step 1.
+
+If there is no Better Stack server at all, add the Better Stack plugin from Anthropic's plugin directory (`/plugin install better-stack`), then connect it as above.
+
+### Claude chat and Cowork (claude.ai, the desktop app, mobile)
+
+The plugin's skills load in chat right away, but its MCP server works only after it's connected on the plugin's **Connectors** tab:
+
+1. Open [**Better Stack** in Customize > Plugins](https://claude.ai/customize/plugins/id/a028f8c7-0c25-4976-b0e1-dc8f728ff108%40anthropic-plugin-directory) and add it, or open it if it's already added.
+2. On its **Connectors** tab, add or connect the Better Stack server (`https://mcp.betterstack.com`) and sign in with your Better Stack account.
+3. Start a new chat.
+
+On Team and Enterprise plans, an Owner adds the connector for the organization first, then each member connects with their own account. If Better Stack was added as a connector without the plugin, connect it at [claude.ai/customize/connectors](https://claude.ai/customize/connectors) instead.
+
+### Claude Tag (Claude in Slack)
+
+People in the channel can't connect it from the thread. A Claude Tag admin sets it up once in an Access bundle at [claude.ai/admin-settings/claude-tag](https://claude.ai/admin-settings/claude-tag), with a dedicated Better Stack user rather than a personal login, because everyone in the covered channels acts through it:
+
+1. On the bundle's **Plugins** tab, add the Better Stack plugin.
+2. On the **Credentials** tab, click **Connect** next to **Custom tool**. Choose **MCP Connector**, pick Better Stack and sign in as the dedicated user.
+3. Start a new thread in a covered channel and ask "@Claude list open Better Stack incidents".
+
+Tell the person who asked to forward these steps to their Claude Tag admin.
+
+## 4. After connecting
+
+Once the tools show up, confirm with one read-only call and tell the user it works. If they came with a request, go back to it now and skip the rest of this section. Setup and full docs: [Better Stack MCP](https://betterstack.com/docs/getting-started/integrations/mcp/).
+
+## 5. Suggest what to set up next
+
+When the user only asked to set up or connect Better Stack, or what it can do, end by offering the setups that fit their account.
+
+1. Look at the account with a few read-only calls: `incidents` with `from` 30 days ago, `applications`, then `errors` with `start_time: "now-7d"` for up to 3 applications, and `sources`. Don't list what you read.
+2. Offer at most three setups from the table below whose condition the account meets and that work where you are running. Give each one line that says what it does and what you saw that makes it worth it, for example "You had 14 incidents in the last 30 days." Ask which they want.
+3. Set nothing up until the user picks one.
+
+| Setup | Offer it when | Works in | How to set it up |
+| --- | --- | --- | --- |
+| **Page Claude for your incidents**: Claude investigates each new incident as it starts and comments the likely cause and next step on it | the account had incidents in the last 30 days | Claude: Claude Code, or the Code tab at claude.ai/code | Follow the prompt under "Page Claude for your incidents" in the docs |
+| **Fix errors on a schedule**: every 4 hours, Claude fixes the obvious new errors with pull requests the user reviews | an error tracking application has unresolved errors from the last 7 days | Claude: Claude Code, in the app's repository | Follow the prompt under "Fix errors on a schedule with Claude" in the docs |
+| **Investigate an incident now**: root cause from the logs, metrics, traces, errors and recent changes around it | an incident is ongoing right now | everywhere | The investigate-incident skill |
+| **Health check**: CPU, memory, disk, log levels and dependencies of a server or service, with charts | the account has log or metrics sources | everywhere | The health-check skill |
+
+The two Claude setups come with prompts in the docs: read https://betterstack.com/docs/getting-started/integrations/mcp/claude.md word for word (with a shell, print it with `curl -s`; don't save it as `claude.md`, which Claude Code on macOS loads as `CLAUDE.md`), and carry out the prompt under the setup's heading as if the user had pasted it. If you can't load the page or don't find that heading, don't make the setup up: tell the user and link them to https://betterstack.com/docs/getting-started/integrations/mcp/claude/. In Claude chat outside the Code tab, tell the user to open the Code tab in their app's repository and ask there.
