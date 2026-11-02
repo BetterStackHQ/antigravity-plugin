@@ -1,0 +1,36 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "betterstack",
+  "displayName": "Better Stack",
+  "description": "Investigate incidents, check who's on call, and query logs, metrics, traces, errors and RUM in Better Stack. Build dashboards and manage uptime monitors.",
+  "version": "1.3.12",
+  "author": {
+    "name": "Better Stack, Inc.",
+    "url": "https://betterstack.com"
+  },
+  "homepage": "https://betterstack.com/docs/getting-started/integrations/mcp/",
+  "repository": "https://github.com/BetterStackHQ/antigravity-plugin",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Show me all monitors that are currently down.",
+    "Who's on call right now?",
+    "Create a dashboard showing error rates for my API service."
+  ],
+  "keywords": [
+    "observability",
+    "monitoring",
+    "incident-response",
+    "on-call",
+    "incidents",
+    "uptime",
+    "logs",
+    "metrics",
+    "traces",
+    "errors",
+    "dashboards",
+    "telemetry",
+    "better-stack",
+    "mcp"
+  ]
+}
