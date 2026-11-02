@@ -10,10 +10,21 @@ agy plugin install https://github.com/BetterStackHQ/antigravity-plugin
 
 The plugin adds the Better Stack MCP server (`https://mcp.betterstack.com`) and its skills. Sign in once with your Better Stack account, no token needed:
 
+**In the Antigravity app or IDE:**
+
 1. Open the settings with Cmd + , (Ctrl + , on Windows and Linux) and go to the **Customizations** tab.
 2. Click **Authenticate** next to the Better Stack server and sign in in the browser.
 3. Copy the authorization code the browser shows, paste it in the settings panel and click **Submit**.
 4. Start a new conversation so the tools load.
+
+**In the `agy` CLI:**
+
+1. Run `/mcp`, select `betterstack_betterstack` and choose **Authenticate**.
+2. Sign in with your Better Stack account at the link it shows.
+3. Copy the authorization code the browser shows and paste it at the prompt.
+4. Start a new conversation with `/new` so the tools load.
+
+The tools show up as `betterstack_betterstack/<tool>`, for example `betterstack_betterstack/on_calls`.
 
 ### Not connected yet?
 
