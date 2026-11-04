@@ -3,7 +3,7 @@
   "name": "betterstack",
   "displayName": "Better Stack",
   "description": "Investigate incidents, check who's on call, and query logs, metrics, traces, errors and RUM in Better Stack. Build dashboards and manage uptime monitors.",
-  "version": "1.3.12",
+  "version": "1.3.13",
   "author": {
     "name": "Better Stack, Inc.",
     "url": "https://betterstack.com"
